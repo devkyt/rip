@@ -7,8 +7,8 @@ import (
 )
 
 var (
-	ErrInvalidIPBits = errors.New("rip: invalid IP bits")
-	ErrInvalidIP     = errors.New("rip: invalid IP")
+	ErrInvalidIPBits    = errors.New("rip: invalid IP bits")
+	ErrInvalidIPAddress = errors.New("rip: invalid IP")
 )
 
 const (
@@ -25,7 +25,7 @@ func (m *Mask) Hide(ip netip.Addr) (netip.Addr, error) {
 	ip = ip.Unmap()
 
 	if !ip.IsValid() {
-		return netip.Addr{}, fmt.Errorf("%w: %s", ErrInvalidIP, ip)
+		return netip.Addr{}, fmt.Errorf("%w: %s", ErrInvalidIPAddress, ip)
 	}
 
 	bits := m.ipv4Bits
