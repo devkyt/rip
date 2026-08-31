@@ -21,28 +21,6 @@ type Mask struct {
 	ipv6Bits int
 }
 
-func (m *Mask) Hide(ip netip.Addr) (netip.Addr, error) {
-	ip = ip.Unmap()
-
-	if !ip.IsValid() {
-		return netip.Addr{}, fmt.Errorf("%w: %s", ErrInvalidIPAddress, ip)
-	}
-
-	bits := m.ipv4Bits
-
-	if ip.Is6() {
-		bits = m.ipv6Bits
-	}
-
-	p, err := ip.Prefix(bits)
-
-	if err != nil {
-		return netip.Addr{}, fmt.Errorf("%w: %d", ErrInvalidIPBits, bits)
-	}
-
-	return p.Addr(), nil
-}
-
 func DefaultMask() *Mask {
 	return &Mask{
 		ipv4Bits: DefaultIPv4Bits,
@@ -63,4 +41,26 @@ func NewMask(ipv4Bits, ipv6Bits int) (*Mask, error) {
 		ipv4Bits: ipv4Bits,
 		ipv6Bits: ipv6Bits,
 	}, nil
+}
+
+func (m *Mask) Hide(ip netip.Addr) (netip.Addr, error) {
+	ip = ip.Unmap()
+
+	if !ip.IsValid() {
+		return netip.Addr{}, fmt.Errorf("%w: %s", ErrInvalidIPAddress, ip)
+	}
+
+	bits := m.ipv4Bits
+
+	if ip.Is6() {
+		bits = m.ipv6Bits
+	}
+
+	p, err := ip.Prefix(bits)
+
+	if err != nil {
+		return netip.Addr{}, fmt.Errorf("%w: %d", ErrInvalidIPBits, bits)
+	}
+
+	return p.Addr(), nil
 }
