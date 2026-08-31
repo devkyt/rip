@@ -1,14 +1,8 @@
 package rip
 
 import (
-	"errors"
 	"fmt"
 	"net/netip"
-)
-
-var (
-	ErrInvalidIPBits    = errors.New("rip: unsufficient IP bits")
-	ErrInvalidIPAddress = errors.New("rip: invalid IP")
 )
 
 const (

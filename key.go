@@ -3,14 +3,7 @@ package rip
 import (
 	"crypto/hkdf"
 	"crypto/sha256"
-	"errors"
 	"log/slog"
-)
-
-var (
-	ErrKeySize          = errors.New("rip: unsufficient key size")
-	ErrNoPrimaryKey     = errors.New("rip: no primary key")
-	ErrRefuseMarshalKey = errors.New("rip: refuse to marshal key")
 )
 
 const (
