@@ -7,7 +7,7 @@ import (
 )
 
 var (
-	ErrInvalidIPBits    = errors.New("rip: invalid IP bits")
+	ErrInvalidIPBits    = errors.New("rip: unsufficient IP bits")
 	ErrInvalidIPAddress = errors.New("rip: invalid IP")
 )
 

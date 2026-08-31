@@ -72,8 +72,10 @@ func (k Key) GoString() string { return "*******" }
 
 func (k Key) LogValue() slog.Value { return slog.StringValue("*******") }
 
-func (k Key) MarshalText() ([]byte, error) {
-	return nil, ErrRefuseMarshalKey
-}
+func (k Key) Len() int { return len(k.b) }
+
+func (k Key) MarshalText() ([]byte, error) { return nil, ErrRefuseMarshalKey }
 
 func (k Key) Zero() { clear(k.b) }
+
+func (k Key) bytes() []byte { return k.b }
