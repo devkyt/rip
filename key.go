@@ -62,6 +62,12 @@ func (m *MasterKey) Derive(t EncryptionType, l int) (Key, error) {
 	return Key{b: b}, nil
 }
 
+func (m *MasterKey) Zero() {
+	if m != nil {
+		clear(m.prk)
+	}
+}
+
 type Key struct {
 	b []byte
 }
