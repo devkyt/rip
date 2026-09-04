@@ -18,7 +18,7 @@ func NewDetermenisticEncryption(k Key) (*DetermenisticEncryption, error) {
 	block, err := aes.NewCipher(k.bytes())
 
 	if err != nil {
-		return nil, err
+		return nil, ErrKeySize
 	}
 
 	return &DetermenisticEncryption{block: block}, nil

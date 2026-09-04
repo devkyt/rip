@@ -9,4 +9,5 @@ var (
 	ErrKeySize          = errors.New("rip: unsufficient key size")
 	ErrNoPrimaryKey     = errors.New("rip: no primary key")
 	ErrRefuseMarshalKey = errors.New("rip: refuse to marshal key")
+	ErrKeyHalvesEqual   = errors.New("rip: key halves are equal")
 )
