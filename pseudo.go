@@ -7,10 +7,11 @@ import (
 	"net/netip"
 )
 
-const (
-	TokenSize    = 16
-	MinTokenSize = 8
-)
+const TokenSize = 16
+
+const MinTokenSize = 8
+
+const AddrSize = 16
 
 type Token [TokenSize]byte
 
@@ -19,7 +20,7 @@ type Pseudo struct {
 }
 
 func NewPseudo(k Key) (*Pseudo, error) {
-	if k.Len() < KeySize256 {
+	if k.Len() != KeySize256 {
 		return nil, ErrKeySize
 	}
 
@@ -44,12 +45,12 @@ func NewPseudo(k Key) (*Pseudo, error) {
 	return &Pseudo{k1: k1, k2: k2}, nil
 }
 
-func (p *Pseudo) TokenFromIP(addr netip.Addr) (Token, error) {
-	return p.StackTokenFromIP(new(ScratchToken), addr)
+func (p *Pseudo) Token(addr netip.Addr) (Token, error) {
+	return p.CreateTokenFromScratch(new(ScratchToken), addr)
 }
 
 // use it directly to avoid heap allocation
-func (p *Pseudo) StackTokenFromIP(s *ScratchToken, addr netip.Addr) (Token, error) {
+func (p *Pseudo) CreateTokenFromScratch(s *ScratchToken, addr netip.Addr) (Token, error) {
 	if !addr.IsValid() {
 		return Token{}, ErrInvalidIPAddress
 	}
@@ -57,7 +58,7 @@ func (p *Pseudo) StackTokenFromIP(s *ScratchToken, addr netip.Addr) (Token, erro
 	s.ip = addr.As16()
 
 	p.k1.Encrypt(s.e1[:], s.ip[:])
-	p.k2.Encrypt(s.e2[:], s.e1[:])
+	p.k2.Encrypt(s.e2[:], s.ip[:])
 
 	for i := range s.e1 {
 		s.e1[i] ^= s.e2[i]
@@ -67,7 +68,8 @@ func (p *Pseudo) StackTokenFromIP(s *ScratchToken, addr netip.Addr) (Token, erro
 }
 
 type ScratchToken struct {
-	ip, e1, e2 [TokenSize]byte
+	ip     [AddrSize]byte
+	e1, e2 [TokenSize]byte
 }
 
 func (s *ScratchToken) Zero() { *s = ScratchToken{} }
