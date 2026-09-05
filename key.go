@@ -12,11 +12,12 @@ const (
 	KeySize256    = 32
 )
 
-type EncryptionType string
+type Mode string
 
 const (
-	Determenistic EncryptionType = "determenistic"
-	Prefx         EncryptionType = "prefix"
+	Determenistic Mode = "ipcrypt-deterministic"
+	Prefx         Mode = "ipcrypt-pfx"
+	Pseudonym     Mode = "rip-pseudonym-v1"
 )
 
 type MasterKey struct {
@@ -37,7 +38,7 @@ func NewMasterKey(secret, salt []byte) (*MasterKey, error) {
 	return &MasterKey{prk: prk}, nil
 }
 
-func (m *MasterKey) Derive(t EncryptionType, l int) (Key, error) {
+func (m *MasterKey) Derive(t Mode, l int) (Key, error) {
 	if len(m.prk) == 0 {
 		return Key{}, ErrNoPrimaryKey
 	}

@@ -46,11 +46,11 @@ func NewPseudo(k Key) (*Pseudo, error) {
 }
 
 func (p *Pseudo) Token(addr netip.Addr) (Token, error) {
-	return p.CreateTokenFromScratch(new(ScratchToken), addr)
+	return p.TokenFromScratch(new(ScratchToken), addr)
 }
 
 // use it directly to avoid heap allocation
-func (p *Pseudo) CreateTokenFromScratch(s *ScratchToken, addr netip.Addr) (Token, error) {
+func (p *Pseudo) TokenFromScratch(s *ScratchToken, addr netip.Addr) (Token, error) {
 	if !addr.IsValid() {
 		return Token{}, ErrInvalidIPAddress
 	}
