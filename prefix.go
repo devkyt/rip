@@ -43,7 +43,7 @@ func (b block128) shiftLeftBy1() block128 {
 }
 
 func (b block128) isV4() bool {
-	return b.w0 == 0 && b.w1>>32 == 0xFFF
+	return b.w0 == 0 && b.w1>>32 == 0xFFFF
 }
 
 func (b block128) address() netip.Addr {
