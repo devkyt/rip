@@ -72,7 +72,7 @@ func (p *Prefix) encrypt(s *ScratchPrefix, in block128) netip.Addr {
 
 	for n := start; n < 128; n += pfxBatch {
 		for i := range pfxBatch {
-			pp.store(&s.in[i])
+			pp.to(&s.in[i])
 			pp.shiftLeftBy1()
 			pp.setBit(0, in.bit(127-(n+uint(i))))
 		}
@@ -91,6 +91,49 @@ func (p *Prefix) encrypt(s *ScratchPrefix, in block128) netip.Addr {
 	}
 
 	return out.address()
+}
+
+func (p *Prefix) Decrypt(addr netip.Addr) (netip.Addr, error) {
+	var s ScratchPrefix
+
+	return p.DecryptScratch(&s, addr)
+}
+
+func (p *Prefix) DecryptScratch(s *ScratchPrefix, addr netip.Addr) (netip.Addr, error) {
+	if !addr.IsValid() {
+		return netip.Addr{}, ErrInvalidIPAddress
+	}
+
+	return p.decrypt(s, newBlock128(addr.As16())), nil
+}
+
+func (p *Prefix) decrypt(s *ScratchPrefix, in block128) netip.Addr {
+	start, pp, out := begin(in)
+
+	for n := start; n < 128; n++ {
+		cb := p.pfxBit(s, pp)
+
+		pos := 127 - n
+
+		pb := in.bit(pos) ^ cb
+
+		out.setBit(pos, pb)
+
+		pp = pp.shiftLeftBy1()
+
+		pp.setBit(0, pb)
+	}
+
+	return out.address()
+}
+
+func (p *Prefix) pfxBit(s *ScratchPrefix, pp block128) uint64 {
+	pp.to(&s.in[0])
+
+	p.k1.Encrypt(s.out[0][:], s.in[0][:])
+	p.k2.Encrypt(s.out[1][:], s.in[0][:])
+
+	return uint64(s.out[0][15]^s.out[1][15]) & 1
 }
 
 func begin(in block128) (start uint, pp block128, out block128) {
@@ -139,7 +182,7 @@ func (b block128) shiftLeftBy1() block128 {
 func (b block128) address() netip.Addr {
 	var raw [16]byte
 
-	b.store(&raw)
+	b.to(&raw)
 
 	a := netip.AddrFrom16(raw)
 
@@ -150,7 +193,7 @@ func (b block128) address() netip.Addr {
 	return a
 }
 
-func (b block128) store(dst *[16]byte) {
+func (b block128) to(dst *[16]byte) {
 	binary.BigEndian.PutUint64(dst[0:8], b.w0)
 	binary.BigEndian.PutUint64(dst[8:16], b.w1)
 }
