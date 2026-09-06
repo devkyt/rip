@@ -19,6 +19,10 @@ ip := m.Hide("192.168.0.4") // 192.0.0.0
 ### Pseudonym — Non-Reversible
 
 
+```golang
+```
+
+
 ### Determenistic Encryption — Reversible
 
 ```golang
