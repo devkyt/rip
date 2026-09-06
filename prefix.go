@@ -18,6 +18,11 @@ var (
 	padPfx96 = block128{w0: 1 << 32, w1: 0xFFFF}
 )
 
+type ScratchPrefix struct {
+	in  [pfxBatch][16]byte
+	out [2 * pfxBatch][16]byte
+}
+
 type Prefix struct {
 	k1, k2 cipher.Block
 }
@@ -48,6 +53,56 @@ func NewPrefix(k Key) (*Prefix, error) {
 	return &Prefix{k1: k1, k2: k2}, nil
 }
 
+func (p *Prefix) Encrypt(addr netip.Addr) (netip.Addr, error) {
+	var s ScratchPrefix
+
+	return p.EncryptScratch(&s, addr)
+}
+
+func (p *Prefix) EncryptScratch(s *ScratchPrefix, addr netip.Addr) (netip.Addr, error) {
+	if !addr.IsValid() {
+		return netip.Addr{}, ErrInvalidIPAddress
+	}
+
+	return p.encrypt(s, newBlock128(addr.As16())), nil
+}
+
+func (p *Prefix) encrypt(s *ScratchPrefix, in block128) netip.Addr {
+	start, pp, out := begin(in)
+
+	for n := start; n < 128; n += pfxBatch {
+		for i := range pfxBatch {
+			pp.store(&s.in[i])
+			pp.shiftLeftBy1()
+			pp.setBit(0, in.bit(127-(n+uint(i))))
+		}
+
+		for i := range pfxBatch {
+			p.k1.Encrypt(s.out[2*i][:], s.in[i][:])
+			p.k2.Encrypt(s.out[2*i+1][:], s.in[i][:])
+		}
+
+		for i := range pfxBatch {
+			pos := 127 - (n + uint(i))
+			cb := uint64(s.out[2*i][15]^s.out[2*i+1][15]) & 1
+
+			out.setBit(pos, in.bit(pos)^cb)
+		}
+	}
+
+	return out.address()
+}
+
+func begin(in block128) (start uint, pp block128, out block128) {
+	if in.isV4() {
+		out.w1 = v4TopBits << 32
+
+		return 96, padPfx96, out
+	}
+
+	return 0, padPfx0, out
+}
+
 type block128 struct {
 	w0, w1 uint64
 }
@@ -70,6 +125,7 @@ func (b block128) bit(pos uint) uint64 {
 func (b block128) setBit(pos uint, v uint64) {
 	if pos < 64 {
 		b.w1 |= v << pos
+
 		return
 	}
 
@@ -102,5 +158,3 @@ func (b block128) store(dst *[16]byte) {
 func (b block128) isV4() bool {
 	return b.w0 == 0 && b.w1>>32 == v4TopBits
 }
-
-// func begin(in block128) (start uint, pp block128, out block128) {}
