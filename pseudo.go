@@ -9,8 +9,6 @@ import (
 
 const TokenSize = 16
 
-const MinTokenSize = 8
-
 const AddrSize = 16
 
 type Token [TokenSize]byte

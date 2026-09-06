@@ -6,11 +6,11 @@ import (
 	"net/netip"
 )
 
-type DetermenisticEncryption struct {
+type DeterministicEncryption struct {
 	block cipher.Block
 }
 
-func NewDetermenisticEncryption(k Key) (*DetermenisticEncryption, error) {
+func NewDeterministicEncryption(k Key) (*DeterministicEncryption, error) {
 	if k.Len() != KeySize128 {
 		return nil, ErrKeySize
 	}
@@ -21,10 +21,10 @@ func NewDetermenisticEncryption(k Key) (*DetermenisticEncryption, error) {
 		return nil, ErrKeySize
 	}
 
-	return &DetermenisticEncryption{block: block}, nil
+	return &DeterministicEncryption{block: block}, nil
 }
 
-func (d *DetermenisticEncryption) Encrypt(addr netip.Addr) (netip.Addr, error) {
+func (d *DeterministicEncryption) Encrypt(addr netip.Addr) (netip.Addr, error) {
 	if !addr.IsValid() {
 		return netip.Addr{}, ErrInvalidIPAddress
 	}
@@ -38,7 +38,7 @@ func (d *DetermenisticEncryption) Encrypt(addr netip.Addr) (netip.Addr, error) {
 	return netip.AddrFrom16(out).Unmap(), nil
 }
 
-func (d *DetermenisticEncryption) Decrypt(addr netip.Addr) (netip.Addr, error) {
+func (d *DeterministicEncryption) Decrypt(addr netip.Addr) (netip.Addr, error) {
 	if !addr.IsValid() {
 		return netip.Addr{}, ErrInvalidIPAddress
 	}

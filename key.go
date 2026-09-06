@@ -15,9 +15,9 @@ const (
 type Mode string
 
 const (
-	Determenistic Mode = "ipcrypt-deterministic"
-	Prefx         Mode = "ipcrypt-pfx"
-	Pseudonym     Mode = "rip-pseudonym-v1"
+	ModeDeterministic Mode = "ipcrypt-deterministic"
+	ModePrefix        Mode = "ipcrypt-pfx"
+	ModePseudonym     Mode = "rip-pseudonym-v1"
 )
 
 type MasterKey struct {

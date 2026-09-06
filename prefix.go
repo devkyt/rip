@@ -73,7 +73,7 @@ func (p *Prefix) encrypt(s *ScratchPrefix, in block128) netip.Addr {
 	for n := start; n < 128; n += pfxBatch {
 		for i := range pfxBatch {
 			pp.to(&s.in[i])
-			pp.shiftLeftBy1()
+			pp = pp.shiftLeftBy1()
 			pp.setBit(0, in.bit(127-(n+uint(i))))
 		}
 
@@ -165,7 +165,7 @@ func (b block128) bit(pos uint) uint64 {
 	return b.w0 >> (pos - 64) & 1
 }
 
-func (b block128) setBit(pos uint, v uint64) {
+func (b *block128) setBit(pos uint, v uint64) {
 	if pos < 64 {
 		b.w1 |= v << pos
 
